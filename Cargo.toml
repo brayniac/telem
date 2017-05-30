@@ -1,0 +1,25 @@
+[package]
+name = "telem"
+version = "0.0.1"
+authors = ["Brian Martin <brayniac@gmail.com>"]
+license = "MIT/Apache-2.0"
+readme = "README.md"
+
+homepage = "https://github.com/brayniac/telem"
+repository = "https://github.com/brayniac/telem"
+
+description = "telemetry agent exposing intel perf counters for prometheus compatible monitoring"
+
+keywords = [ "stats", "metrics", "telemetry", "perf", "intel", "monitoring" ]
+
+[dependencies]
+getopts = "*"
+log = "*"
+perfcnt = "*"
+shuteye = "*"
+tic = "*"
+time = "*"
+x86 = "*"
+
+[features]
+default = [ "x86/performance-counter" ]
