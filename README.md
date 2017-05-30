@@ -1,16 +1,18 @@
 # telem - telemetry agent
-a prometheus compatible telemetry agent which exposes intel perf counters
+a Prometheus-compatible telemetry agent which exposes Intel Performance counters
 
 ## Usage
 
+Note: telem may require sudo for reading the performance counters
+
 ```shell
-cargo run --release -- --metrics 0.0.0.0:42024
+cargo build --release && sudo ./target/release/telem --listen 0.0.0.0:42024
 ```
 
 ## Features
 
-* Prometheus compatible
-* Intel Performance Counters
+* Prometheus-compatible
+* Intel Performance counters
 
 ## License
 
