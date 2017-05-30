@@ -23,3 +23,4 @@ x86 = "*"
 
 [features]
 default = [ "x86/performance-counter" ]
+asm = [ "default", "tic/asm" ]
