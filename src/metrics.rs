@@ -1,12 +1,10 @@
-extern crate x86;
-
 use perfcnt::PerfCounter;
-use perfcnt::linux::PerfCounterBuilderLinux;
+use perfcnt::linux::{HardwareEventType, PerfCounterBuilderLinux};
 use std::collections::HashMap;
 use std::fmt;
 use std::time::Duration;
 use tic::{Interest, Receiver};
-//use x86;
+use x86;
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub enum Metric {
@@ -20,6 +18,9 @@ pub enum Metric {
     MemoryLoadsSplit,
     MemoryStoresTotal,
     MemoryStoresSplit,
+    InstructionsRetired,
+    Instructions,
+    Cycles,
 }
 
 impl fmt::Display for Metric {
@@ -35,11 +36,14 @@ impl fmt::Display for Metric {
             Metric::MemoryStoresTotal => write!(f, "telem_memory_stores_total"),
             Metric::MemoryLoadsSplit => write!(f, "telem_memory_loads_split"),
             Metric::MemoryStoresSplit => write!(f, "telem_memory_stores_split"),
+            Metric::InstructionsRetired => write!(f, "telem_instructions_retired"),
+            Metric::Instructions => write!(f, "telem_instructions"),
+            Metric::Cycles => write!(f, "telem_cycles"),
         }
     }
 }
 
-pub fn intel_core_counters() -> HashMap<Metric, PerfCounter> {
+pub fn get_counters() -> HashMap<Metric, PerfCounter> {
     let mut h = HashMap::new();
     for (key, descr) in x86::perfcnt::core_counters().unwrap() {
         if let Some(metric) = match *key {
@@ -53,14 +57,24 @@ pub fn intel_core_counters() -> HashMap<Metric, PerfCounter> {
                "MEM_UOPS_RETIRED.ALL_STORES" => Some(Metric::MemoryStoresTotal),
                "MEM_UOPS_RETIRED.SPLIT_LOADS" => Some(Metric::MemoryLoadsSplit),
                "MEM_UOPS_RETIRED.SPLIT_STORES" => Some(Metric::MemoryStoresSplit),
+               "UOPS_RETIRED.ALL" => Some(Metric::InstructionsRetired),
                _ => None,
            } {
             h.insert(metric,
-                     PerfCounterBuilderLinux::from_intel_event_description(&descr)
+                     PerfCounterBuilderLinux::from_intel_event_description(descr)
                          .finish()
                          .unwrap());
         }
     }
+
+    h.insert(Metric::Instructions,
+             PerfCounterBuilderLinux::from_hardware_event(HardwareEventType::Instructions)
+                 .finish()
+                 .unwrap());
+    h.insert(Metric::Cycles,
+             PerfCounterBuilderLinux::from_hardware_event(HardwareEventType::RefCPUCycles)
+                 .finish()
+                 .unwrap());
     h
 }
 
@@ -78,7 +92,7 @@ pub fn init(listen: Option<String>) -> Receiver<Metric> {
 
     let mut receiver = config.build();
 
-    for (metric, _) in intel_core_counters() {
+    for (metric, _) in get_counters() {
         receiver.add_interest(Interest::Count(metric));
     }
 

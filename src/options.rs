@@ -15,7 +15,7 @@ fn opts() -> Options {
     let mut opts = Options::new();
 
     opts.optflag("", "version", "show version and exit");
-    opts.optopt("", "metrics", "listen address for stats", "IP:PORT");
+    opts.optopt("", "listen", "listen address for stats", "IP:PORT");
     opts.optflagmulti("v", "verbose", "verbosity (stacking)");
     opts.optflag("h", "help", "print this help menu");
 
