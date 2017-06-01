@@ -11,13 +11,11 @@ extern crate x86;
 mod logging;
 mod metrics;
 mod options;
+mod sources;
 
 use logging::set_log_level;
+use metrics::Collector;
 use options::{PROGRAM, VERSION};
-use perfcnt::AbstractPerfCounter;
-use std::thread;
-use std::time::Duration;
-use tic::Sample;
 
 fn main() {
     let options = options::init();
@@ -27,30 +25,14 @@ fn main() {
     info!("{} {}", PROGRAM, VERSION);
 
     // initialize metrics
-    let mut metrics = metrics::init(options.opt_str("listen"));
-    let clock = metrics.get_clocksource();
-    let mut sender = metrics.get_sender();
-    thread::spawn(move || { metrics.run(); });
+    // let mut metrics = metrics::init(options.opt_str("listen"));
+    // let clock = metrics.get_clocksource();
+    // let mut sender = metrics.get_sender();
+    // thread::spawn(move || { metrics.run(); });
 
-    let mut counters = metrics::get_counters();
+    let mut collector = Collector::new(options.opt_str("listen"));
 
     loop {
-        let t0 = clock.counter();
-        for counter in counters.values_mut() {
-            counter.start().expect("Could not start perf counter");
-        }
-        shuteye::sleep(Duration::new(0, 1_000_000));
-        let t1 = clock.counter();
-        for counter in counters.values_mut() {
-            counter.stop().expect("Could not start perf counter");
-        }
-        for (metric, counter) in &mut counters {
-            let _ = sender
-                .send(Sample::counted(t0,
-                                      t1,
-                                      counter.read().expect("Could not read perf counter"),
-                                      metric.clone()));
-            counter.reset().expect("Could not reset perf counter");
-        }
+        collector.collect();
     }
 }

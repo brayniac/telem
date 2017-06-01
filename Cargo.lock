@@ -1,6 +1,6 @@
 [root]
 name = "telem"
-version = "0.0.1"
+version = "0.0.3"
 dependencies = [
  "getopts 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
