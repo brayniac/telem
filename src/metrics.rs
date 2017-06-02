@@ -1,6 +1,6 @@
 use perfcnt::AbstractPerfCounter;
 use shuteye;
-use sources::PerfCounters;
+use sources::*;
 use std::fmt;
 use std::thread;
 use std::time::Duration;
@@ -23,6 +23,7 @@ pub enum Metric {
     Cycles,
     PageFaults,
     ContextSwitches,
+    CpuRunningMilliseconds(String),
 }
 
 impl fmt::Display for Metric {
@@ -43,6 +44,7 @@ impl fmt::Display for Metric {
             Metric::Cycles => write!(f, "cycles"),
             Metric::PageFaults => write!(f, "page_faults"),
             Metric::ContextSwitches => write!(f, "context_switches"),
+            Metric::CpuRunningMilliseconds(ref s) => write!(f, "{}_running_milliseconds", s),
         }
     }
 }
@@ -59,7 +61,7 @@ impl Collector {
             .batch_size(1024)
             .duration(1)
             .capacity(4096)
-            .poll_delay(Some(Duration::new(0, 1_000_000)))
+            .poll_delay(Some(Duration::new(0, 10_000_000)))
             .service(true);
 
         if let Some(addr) = listen {
@@ -74,8 +76,15 @@ impl Collector {
             receiver.add_interest(Interest::Count(metric));
         }
 
+
+
         let sender = receiver.get_sender();
         let clocksource = receiver.get_clocksource();
+
+        let schedstat = SchedstatCounters::new(clocksource.counter());
+        for metric in schedstat.metrics() {
+            receiver.add_interest(Interest::Count(metric));
+        }
 
         thread::spawn(move || receiver.run());
 
@@ -91,11 +100,14 @@ impl Collector {
         for counter in self.perf.counters.values_mut() {
             counter.start().expect("Could not start perf counter");
         }
-        shuteye::sleep(Duration::new(0, 1_000_000));
+        let mut schedstat = SchedstatCounters::new(t0);
+
+        shuteye::sleep(Duration::new(0, 10_000_000));
         let t1 = self.clock.counter();
         for counter in self.perf.counters.values_mut() {
             counter.stop().expect("Could not start perf counter");
         }
+        schedstat.sample(&mut self.sender, &self.clock);
         for (metric, counter) in &mut self.perf.counters {
             let _ = self.sender
                 .send(Sample::counted(t0,
