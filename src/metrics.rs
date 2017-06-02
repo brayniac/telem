@@ -61,7 +61,7 @@ impl Collector {
             .batch_size(1024)
             .duration(1)
             .capacity(4096)
-            .poll_delay(Some(Duration::new(0, 1_000_000)))
+            .poll_delay(Some(Duration::new(0, 10_000_000)))
             .service(true);
 
         if let Some(addr) = listen {
@@ -102,7 +102,7 @@ impl Collector {
         }
         let mut schedstat = SchedstatCounters::new(t0);
 
-        shuteye::sleep(Duration::new(0, 1_000_000));
+        shuteye::sleep(Duration::new(0, 10_000_000));
         let t1 = self.clock.counter();
         for counter in self.perf.counters.values_mut() {
             counter.stop().expect("Could not start perf counter");
