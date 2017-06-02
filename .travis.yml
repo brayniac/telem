@@ -21,9 +21,9 @@ matrix:
         - cargo fmt -- --write-mode=diff
     - os: linux
       rust: nightly
-      env: TYPE=clippy RUST_BACKTRACE=1 ALLOW_FAIL=1
+      env: TYPE=clippy RUST_BACKTRACE=1
       script:
         - (travis_wait 20 cargo install clippy || true)
         - cargo clippy
   allow_failures:
-    - env: ALLOW_FAIL=1
+    - env: TYPE=clippy RUST_BACKTRACE=1
