@@ -109,11 +109,12 @@ impl Collector {
         }
         schedstat.sample(&mut self.sender, &self.clock);
         for (metric, counter) in &mut self.perf.counters {
-            let _ = self.sender
-                .send(Sample::counted(t0,
-                                      t1,
-                                      counter.read().expect("Could not read perf counter"),
-                                      metric.clone()));
+            let _ = self.sender.send(Sample::counted(
+                t0,
+                t1,
+                counter.read().expect("Could not read perf counter"),
+                metric.clone(),
+            ));
             counter.reset().expect("Could not reset perf counter");
         }
     }

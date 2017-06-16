@@ -13,33 +13,44 @@ impl PerfCounters {
         let mut b = HashMap::new();
         for (key, descr) in x86::perfcnt::core_counters().unwrap() {
             if let Some(metric) = match *key {
-                   "MEM_LOAD_UOPS_RETIRED.L1_HIT" => Some(Metric::MemoryLoadsL1Hit),
-                   "MEM_LOAD_UOPS_RETIRED.L1_MISS" => Some(Metric::MemoryLoadsL1Miss),
-                   "MEM_LOAD_UOPS_RETIRED.L2_HIT" => Some(Metric::MemoryLoadsL2Hit),
-                   "MEM_LOAD_UOPS_RETIRED.L2_MISS" => Some(Metric::MemoryLoadsL2Miss),
-                   "MEM_LOAD_UOPS_RETIRED.L3_HIT" => Some(Metric::MemoryLoadsL3Hit),
-                   "MEM_LOAD_UOPS_RETIRED.L3_MISS" => Some(Metric::MemoryLoadsL3Miss),
-                   "MEM_UOPS_RETIRED.ALL_LOADS" => Some(Metric::MemoryLoads),
-                   "MEM_UOPS_RETIRED.ALL_STORES" => Some(Metric::MemoryStores),
-                   "MEM_UOPS_RETIRED.SPLIT_LOADS" => Some(Metric::MemoryLoadsSplit),
-                   "MEM_UOPS_RETIRED.SPLIT_STORES" => Some(Metric::MemoryStoresSplit),
-                   "UOPS_RETIRED.ALL" => Some(Metric::UopsRetired),
-                   _ => None,
-               } {
-                b.insert(metric,
-                         PerfCounterBuilderLinux::from_intel_event_description(descr));
+                "MEM_LOAD_UOPS_RETIRED.L1_HIT" => Some(Metric::MemoryLoadsL1Hit),
+                "MEM_LOAD_UOPS_RETIRED.L1_MISS" => Some(Metric::MemoryLoadsL1Miss),
+                "MEM_LOAD_UOPS_RETIRED.L2_HIT" => Some(Metric::MemoryLoadsL2Hit),
+                "MEM_LOAD_UOPS_RETIRED.L2_MISS" => Some(Metric::MemoryLoadsL2Miss),
+                "MEM_LOAD_UOPS_RETIRED.L3_HIT" => Some(Metric::MemoryLoadsL3Hit),
+                "MEM_LOAD_UOPS_RETIRED.L3_MISS" => Some(Metric::MemoryLoadsL3Miss),
+                "MEM_UOPS_RETIRED.ALL_LOADS" => Some(Metric::MemoryLoads),
+                "MEM_UOPS_RETIRED.ALL_STORES" => Some(Metric::MemoryStores),
+                "MEM_UOPS_RETIRED.SPLIT_LOADS" => Some(Metric::MemoryLoadsSplit),
+                "MEM_UOPS_RETIRED.SPLIT_STORES" => Some(Metric::MemoryStoresSplit),
+                "UOPS_RETIRED.ALL" => Some(Metric::UopsRetired),
+                _ => None,
+            }
+            {
+                b.insert(
+                    metric,
+                    PerfCounterBuilderLinux::from_intel_event_description(descr),
+                );
             }
         }
 
-        b.insert(Metric::Instructions,
-                 PerfCounterBuilderLinux::from_hardware_event(HardwareEventType::Instructions));
-        b.insert(Metric::Cycles,
-                 PerfCounterBuilderLinux::from_hardware_event(HardwareEventType::RefCPUCycles));
+        b.insert(
+            Metric::Instructions,
+            PerfCounterBuilderLinux::from_hardware_event(HardwareEventType::Instructions),
+        );
+        b.insert(
+            Metric::Cycles,
+            PerfCounterBuilderLinux::from_hardware_event(HardwareEventType::RefCPUCycles),
+        );
 
-        b.insert(Metric::PageFaults,
-                 PerfCounterBuilderLinux::from_software_event(SoftwareEventType::PageFaults));
-        b.insert(Metric::ContextSwitches,
-                 PerfCounterBuilderLinux::from_software_event(SoftwareEventType::ContextSwitches));
+        b.insert(
+            Metric::PageFaults,
+            PerfCounterBuilderLinux::from_software_event(SoftwareEventType::PageFaults),
+        );
+        b.insert(
+            Metric::ContextSwitches,
+            PerfCounterBuilderLinux::from_software_event(SoftwareEventType::ContextSwitches),
+        );
 
         let mut counters = HashMap::new();
         for (metric, builder) in b {

@@ -26,8 +26,10 @@ impl Counters {
             }
             let label = tokens[0];
             let value = tokens[7];
-            data.insert(Metric::CpuRunningMilliseconds(label.to_owned()),
-                        value.parse().unwrap_or(0));
+            data.insert(
+                Metric::CpuRunningMilliseconds(label.to_owned()),
+                value.parse().unwrap_or(0),
+            );
 
             //println!("{}", line.unwrap());
         }
