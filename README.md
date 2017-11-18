@@ -1,6 +1,12 @@
 # telem - telemetry agent
 a Prometheus-compatible telemetry agent which exposes Intel Performance counters
 
+[conduct]: https://brayniac.github.io/conduct
+
+## Code of Conduct
+
+**NOTE**: All conversations and contributions to this project shall adhere to the [Code of Conduct][conduct]
+
 ## Usage
 
 Note: telem may require sudo for reading the performance counters
